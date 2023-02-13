@@ -82,7 +82,7 @@ function updateBall(){
 }
 
 updateBall();
-// setInterval(updateBall,80);
+
 
 
 
