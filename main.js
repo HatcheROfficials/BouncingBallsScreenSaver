@@ -1,4 +1,6 @@
 var canvas = document.getElementById("playground");
+const width = canvas.width = window.innerWidth;
+const height = canvas.height = window.innerHeight;
 
 if(!canvas.getContext){
   console.log("Not able to play media");
@@ -31,14 +33,14 @@ class ball{
     ctx.fill();
   }
 
-  move(){
+  update(){
     this.x += this.velX;
     this.y += this.velY;
 
-    if(this.x >= 300 || this.x <= 0){
+    if(this.x >= width || this.x <= 0){
       this.velX = -this.velX;
     }
-    if(this.y >= 150 || this.y <= 0){
+    if(this.y >= height || this.y <= 0){
       this.velY = -this.velY;
     }
   }
@@ -54,34 +56,38 @@ function randomCol(){
 }
 
 // declaring balls
-var balls = new Array(5);
+var balls = new Array(); // array containing each ball object
+var numBalls = 10; // number of balls
+var minVel = 3;
+var maxVel = 15;
+var minRadius = 10;
+var maxRadius = 20;
 
 // initializing balls
-for(let i=0; i<5; i++){
-  var x = random(0,300);
-  var y = random(0,150);
-  var velX = random(1,5);
-  var velY = random(1,5);
-  var radius = random(10,15);
+for(let i=0; i<numBalls; i++){
+  var x = random(0,width);
+  var y = random(0,height);
+  var velX = random(minVel,maxVel);
+  var velY = random(minVel,maxVel);
+  var radius = random(minRadius,maxRadius);
   var color = randomCol();
-  balls[i] = new ball(x,y,velX,velY,radius,color);
+
+  var newBall = new ball(x,y,velX,velY,radius,color);
+  balls.push(newBall);
 }
 
-function updateBall(){
-  // ctx.clearRect(0,0,300,150);
-
+function loop(){
   ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
-  ctx.fillRect(0, 0, 300, 150);
+  ctx.fillRect(0, 0, width, height);
 
-  for(var i=0; i<5; i++){
-    balls[i].move();
+  for(var i=0; i<numBalls; i++){
+    balls[i].update();
     balls[i].draw();
   }
-
-  requestAnimationFrame(updateBall);
+  requestAnimationFrame(loop);
 }
 
-updateBall();
+loop();
 
 
 
