@@ -37,11 +37,32 @@ class ball{
     this.x += this.velX;
     this.y += this.velY;
 
-    if(this.x >= width || this.x <= 0){
+    if(this.x >= width-this.radius || this.x < this.radius){
       this.velX = -this.velX;
     }
-    if(this.y >= height || this.y <= 0){
+    if(this.y >= height-this.radius || this.y < this.radius){
       this.velY = -this.velY;
+    }
+  }
+
+  collosion(){
+    for(var b of balls){
+      if(this !== b){
+        const dx = this.x - b.x;
+        const dy = this.y - b.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if(dist < this.radius + b.radius + 2){
+          b.color = this.color = randomCol();
+          b.velX = this.velX + b.velX;
+          this.velX = b.velX - this.velX;
+          b.velX = b.velX - this.velX;
+
+          b.velY = this.velY + b.velY;
+          this.velY = b.velY - this.velY;
+          b.velY = b.velY - this.velY;
+        }
+      }
     }
   }
 }
@@ -57,18 +78,20 @@ function randomCol(){
 
 // declaring balls
 var balls = new Array(); // array containing each ball object
-var numBalls = 10; // number of balls
-var minVel = 3;
-var maxVel = 15;
+var numBalls = 15; // number of balls
+var minVel = -2;
+var maxVel = 2;
 var minRadius = 10;
 var maxRadius = 20;
 
 // initializing balls
 for(let i=0; i<numBalls; i++){
-  var x = random(0,width);
-  var y = random(0,height);
+  var x = random(maxRadius,width-maxRadius);
+  var y = random(maxRadius,height-maxRadius);
+
   var velX = random(minVel,maxVel);
   var velY = random(minVel,maxVel);
+
   var radius = random(minRadius,maxRadius);
   var color = randomCol();
 
@@ -76,6 +99,7 @@ for(let i=0; i<numBalls; i++){
   balls.push(newBall);
 }
 
+// update the position of each ball
 function loop(){
   ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
   ctx.fillRect(0, 0, width, height);
@@ -83,6 +107,7 @@ function loop(){
   for(var i=0; i<numBalls; i++){
     balls[i].update();
     balls[i].draw();
+    balls[i].collosion();
   }
   requestAnimationFrame(loop);
 }
