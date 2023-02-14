@@ -53,7 +53,7 @@ class ball{
         const dist = Math.sqrt(dx*dx + dy*dy);
 
         if(dist < this.radius + b.radius + 2){
-          b.color = this.color = randomCol();
+          // b.color = this.color = randomCol();
           b.velX = this.velX + b.velX;
           this.velX = b.velX - this.velX;
           b.velX = b.velX - this.velX;
