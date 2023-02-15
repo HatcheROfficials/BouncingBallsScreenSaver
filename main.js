@@ -179,8 +179,8 @@ function randomCol() {
 // declaring balls
 var balls = new Array(); // array containing each ball object
 var numBalls = 15; // number of balls
-var minVel = -2;
-var maxVel = 2;
+var minVel = -10;
+var maxVel = 10;
 var minRadius = 10;
 var maxRadius = 20;
 
