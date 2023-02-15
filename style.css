@@ -17,6 +17,23 @@ html, body {
   }
   
   #playground{
-    border: 2px solid black;
+    /* border: 2px solid black; */
   }
   
+  h1 {
+    font-size: 2rem;
+    letter-spacing: -1px;
+    position: absolute;
+    margin: 0;
+    top: 1vw;
+    right: 1vw;
+  
+    color: white;
+  }
+
+  #winPrompt{
+    margin: 0;
+    top: 50vh;
+    left: 40vw;
+    font-size: 5vw;
+  }

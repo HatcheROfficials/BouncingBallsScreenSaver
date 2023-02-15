@@ -1,6 +1,9 @@
 var canvas = document.getElementById("playground");
 const width = canvas.width = window.innerWidth;
 const height = canvas.height = window.innerHeight;
+const killCounter = document.getElementById("counter");
+const winPrompt = document.getElementById("winPrompt");
+winPrompt.style.display = "none";
 
 if (!canvas.getContext) {
   console.log("Not able to play media");
@@ -23,32 +26,43 @@ class shape {
   }
 }
 
-
 // Defining Evil Circle Class
 class evilBall extends shape {
   radius;
   color;
+  keyPressed = new Array();
+  killCounter;
 
   constructor(x, y, velX, velY, radius, color) {
     super(x, y, velX, velY);
     this.radius = radius;
     this.color = color;
+    this.killCounter = 0;
 
     window.addEventListener("keydown", (event) => {
-      switch (event.key) {
-        case "ArrowLeft":
-          this.x -= velX;
-          break;
-        case "ArrowRight":
-          this.x += velX;
-          break;
-        case "ArrowUp":
-          this.y -= velY;
-          break;
-        case "ArrowDown":
-          this.y += velY;
-      }
+      this.keyPressed[event.keyCode] = event.type == "keydown";
     });
+    window.addEventListener("keyup", (event) => {
+      this.keyPressed[event.keyCode] = event.type == "keydown";
+    });
+  }
+
+  move(){
+    // move right
+    if(this.keyPressed[39] == true){
+      this.x += this.velX;
+    }
+    // move left
+    if(this.keyPressed[37] == true){
+      this.x -= this.velX;
+    }
+    // move up
+    if(this.keyPressed[38] == true){
+      this.y -= this.velY;
+    }
+    if(this.keyPressed[40] == true){
+      this.y += this.velY;
+    }
   }
 
   draw() {
@@ -82,16 +96,21 @@ class evilBall extends shape {
       var dist = Math.sqrt(dx*dx + dy*dy);
 
       if(dist < this.radius + b.radius){
+        this.killCount();
         b.exist = 0;
         b.color = "red";
-        console.log("capture");
       }
     }
+  }
+
+  killCount(){
+    this.killCounter++;
+    killCounter.textContent = this.killCounter;
   }
 }
 
 // initializing evil circle
-var evil = new evilBall(50,50,10,10,20,"white");
+var evil = new evilBall(50,50,5,5,20,"white");
 
 // defining balls
 class ball extends shape{
@@ -185,18 +204,34 @@ function loop() {
   ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
   ctx.fillRect(0, 0, width, height);
 
+  numBalls = balls.length;
   for (var i = 0; i < numBalls; i++) {
-    balls[i].update();
-    balls[i].draw();
-    balls[i].collosion();
+    if(balls[i].exist == 0){
+      balls.splice(i,1);
+      numBalls--;
+      i=0;
+    } else{
+      balls[i].update();
+      balls[i].draw();
+      balls[i].collosion();
+    }
   }
+
+  if(numBalls == 0){
+    setTimeout(()=> {
+      winPrompt.style.display = "";
+    },1000);
+    return;
+  }
+
   evil.draw();
   evil.checkBounds();
   evil.collosion();
+  evil.move();
   requestAnimationFrame(loop);
 }
 
-
+// setInterval(loop,50);
 loop();
 
 
