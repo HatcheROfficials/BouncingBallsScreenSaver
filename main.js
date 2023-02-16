@@ -3,6 +3,7 @@ const width = canvas.width = window.innerWidth;
 const height = canvas.height = window.innerHeight;
 const killCounter = document.getElementById("counter");
 const winPrompt = document.getElementById("winPrompt");
+var keyPressed = new Array();
 winPrompt.style.display = "none";
 
 if (!canvas.getContext) {
@@ -26,55 +27,56 @@ class shape {
   }
 }
 
-// Defining Evil Circle Class
+// Defining Evil Ball Class
 class evilBall extends shape {
   radius;
   color;
-  keyPressed = new Array();
-  killCounter;
+  
 
   constructor(x, y, velX, velY, radius, color) {
     super(x, y, velX, velY);
     this.radius = radius;
     this.color = color;
-    this.killCounter = 0;
 
     window.addEventListener("keydown", (event) => {
-      this.keyPressed[event.keyCode] = event.type == "keydown";
+      keyPressed[event.keyCode] = event.type == "keydown";
     });
     window.addEventListener("keyup", (event) => {
-      this.keyPressed[event.keyCode] = event.type == "keydown";
+      keyPressed[event.keyCode] = event.type == "keydown";
     });
   }
 
-  move(){
+  move() {
     // move right
-    if(this.keyPressed[39] == true){
+    if (keyPressed[39] == true) {
       this.x += this.velX;
     }
     // move left
-    if(this.keyPressed[37] == true){
+    if (keyPressed[37] == true) {
       this.x -= this.velX;
     }
     // move up
-    if(this.keyPressed[38] == true){
+    if (keyPressed[38] == true) {
       this.y -= this.velY;
     }
-    if(this.keyPressed[40] == true){
+    if (keyPressed[40] == true) {
       this.y += this.velY;
     }
   }
 
   draw() {
     ctx.beginPath();
-
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = this.color;
-    ctx.stroke();
+    ctx.fillStyle = this.color;
+    ctx.fill();
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(this.x, this.y-5, 30, 10);
+    ctx.closePath();
   }
-  
-  checkBounds(){
+
+  checkBounds() {
     if (this.x >= width - this.radius) {
       this.x = width - this.radius;
     }
@@ -90,30 +92,83 @@ class evilBall extends shape {
   }
 
   collosion() {
-    for(var b of balls){
+    for (var b of balls) {
       var dx = this.x - b.x;
       var dy = this.y - b.y;
-      var dist = Math.sqrt(dx*dx + dy*dy);
+      var dist = Math.sqrt(dx * dx + dy * dy);
 
-      if(dist < this.radius + b.radius){
-        this.killCount();
-        b.exist = 0;
-        b.color = "red";
+      if (dist < this.radius + b.radius) {
+        winPrompt.textContent = "You Lose !!!";
+        winPrompt.style.display = "";
+        // b.exist = 0;
+        // b.color = "red";
       }
     }
   }
+}
 
-  killCount(){
-    this.killCounter++;
-    killCounter.textContent = this.killCounter;
+// declaring evil circle
+evilBall_body = new evilBall(50, 50, 10, 10, 20, "white");
+
+// defining bullets
+class bullet extends shape{
+  radius;
+  color;
+  expended = 0;
+
+  constructor(x,y,velX,velY,radius,color){
+    super(x,y,velX,velY);
+    this.radius = radius;
+    this.color = color;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    ctx.lineWidth = 1;
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  move(){
+    this.x += this.velX;
+  }
+
+  // removing bullets that are out of screen
+  expended_check(){
+    if(this.x > width){
+      this.expended = 1;
+    }
+  }
+
+  bullet_strike(){
+    for(var i=0; i<balls.length; i++){
+      for(var j=0; j<bullets.length; j++){
+        if(bullets[j].x + bullets[j].radius > balls[i].x - balls[i].radius &&  
+          bullets[j].x - bullets[j].radius < balls[i].x + balls[i].radius &&
+          bullets[j].y + bullets[j].radius > balls[i].y - balls[i].radius &&
+          bullets[j].y - bullets[j].radius < balls[i].y + balls[i].radius){
+            bullets[j].expended = 1;
+            balls[i].exist = 0;
+          }
+      }
+    }
   }
 }
 
-// initializing evil circle
-var evil = new evilBall(50,50,5,5,20,"white");
+var bullets = [];
+// defining bullt
+window.addEventListener("keydown", (event) => {
+  if(keyPressed[32] == true){
+    var bul = new bullet(evilBall_body.x,evilBall_body.y,20,5,10,"red");
+    bullets.push(bul);
+  }
+});
+
 
 // defining balls
-class ball extends shape{
+class ball extends shape {
   radius;
   color;
   exist;
@@ -127,10 +182,10 @@ class ball extends shape{
 
   draw() {
     ctx.beginPath();
-
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fillStyle = this.color;
     ctx.fill();
+    ctx.closePath();
   }
 
   update() {
@@ -178,9 +233,9 @@ function randomCol() {
 
 // declaring balls
 var balls = new Array(); // array containing each ball object
-var numBalls = 15; // number of balls
-var minVel = -10;
-var maxVel = 10;
+var numBalls = 10; // number of balls
+var minVel = -8;
+var maxVel = 8;
 var minRadius = 10;
 var maxRadius = 20;
 
@@ -204,30 +259,45 @@ function loop() {
   ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
   ctx.fillRect(0, 0, width, height);
 
-  numBalls = balls.length;
-  for (var i = 0; i < numBalls; i++) {
-    if(balls[i].exist == 0){
-      balls.splice(i,1);
-      numBalls--;
-      i=0;
-    } else{
+  for (var i = 0; i < balls.length; i++) {
+    if (balls[i].exist == 0) {
+      balls.splice(i, 1);
+      i = 0;
+    } else {
       balls[i].update();
       balls[i].draw();
       balls[i].collosion();
     }
   }
 
-  if(numBalls == 0){
-    setTimeout(()=> {
+  if (numBalls == killCounter.textContent) {
+    setTimeout(() => {
       winPrompt.style.display = "";
-    },1000);
+    }, 1000);
     return;
   }
 
-  evil.draw();
-  evil.checkBounds();
-  evil.collosion();
-  evil.move();
+  killCounter.textContent = numBalls - balls.length;
+
+  evilBall_body.draw();
+  evilBall_body.move();
+  evilBall_body.checkBounds();
+  evilBall_body.collosion();
+
+  if(bullets.length > 0){
+    for(let i=0; i<bullets.length; i++){
+      bullets[i].bullet_strike();
+      bullets[i].expended_check();
+      if(bullets[i].expended == 0){
+        bullets[i].draw();
+        bullets[i].move();
+      } else{
+        bullets.splice(i,1);
+        i=0;
+      }
+    }
+  }
+  
   requestAnimationFrame(loop);
 }
 
