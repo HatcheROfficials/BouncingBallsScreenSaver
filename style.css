@@ -30,6 +30,11 @@ html, body {
   
     color: white;
   }
+  #h_bullet_text{
+    margin: 0;
+    top: 3vw;
+    right: 1vw;
+  }
 
   #winPrompt{
     margin: 0;

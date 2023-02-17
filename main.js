@@ -2,6 +2,7 @@ var canvas = document.getElementById("playground");
 const width = canvas.width = window.innerWidth;
 const height = canvas.height = window.innerHeight;
 const killCounter = document.getElementById("counter");
+const bulletCounter = document.getElementById("bulletCounter");
 const winPrompt = document.getElementById("winPrompt");
 var keyPressed = new Array();
 winPrompt.style.display = "none";
@@ -97,9 +98,10 @@ class evilBall extends shape {
       var dy = this.y - b.y;
       var dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < this.radius + b.radius) {
+      if ((dist < this.radius + b.radius) || (maxBullets-numBullets <= 0 && balls.length > 0)) {
         winPrompt.textContent = "You Lose !!!";
         winPrompt.style.display = "";
+        bulletCounter.textContent = 0;
         // b.exist = 0;
         // b.color = "red";
       }
@@ -158,11 +160,16 @@ class bullet extends shape{
 }
 
 var bullets = [];
+var numBullets = 0;
+var maxBullets = 30;
+bulletCounter.textContent = maxBullets;
 // defining bullt
 window.addEventListener("keydown", (event) => {
   if(keyPressed[32] == true){
     var bul = new bullet(evilBall_body.x,evilBall_body.y,20,5,10,"red");
     bullets.push(bul);
+    numBullets++;
+    bulletCounter.textContent = maxBullets - numBullets;
   }
 });
 
@@ -274,7 +281,6 @@ function loop() {
     setTimeout(() => {
       winPrompt.style.display = "";
     }, 1000);
-    return;
   }
 
   killCounter.textContent = numBalls - balls.length;
